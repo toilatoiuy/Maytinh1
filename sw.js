@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ios-calc-xuanlai-v1';
+const CACHE_NAME = 'multi-calc-v1';
 const assets = ['./', './index.html', './manifest.json'];
 
 self.addEventListener('install', (e) => {
