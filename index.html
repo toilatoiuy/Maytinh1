@@ -1,67 +1,85 @@
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Máy tính iOS - Xuân Lai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máy tính Đa năng - Xuân Lai</title>
     <link rel="manifest" href="manifest.json">
     <style>
-        body { background-color: #000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        .calc-container { width: 320px; padding: 20px; }
-        #display { width: 100%; height: 100px; background: none; border: none; color: #fff; font-size: 60px; text-align: right; padding: 10px; outline: none; margin-bottom: 10px; }
-        .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        button { height: 70px; width: 70px; border-radius: 50%; border: none; font-size: 30px; cursor: pointer; transition: brightness 0.2s; }
-        button:active { filter: brightness(1.5); }
-        .gray { background-color: #a5a5a5; color: #000; }
-        .dark-gray { background-color: #333; color: #fff; }
-        .orange { background-color: #ff9f0a; color: #fff; }
-        .zero { grid-column: span 2; width: 152px; border-radius: 40px; text-align: left; padding-left: 30px; }
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --primary: #007bff; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .calc-box { width: 350px; background: var(--card); padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .history { height: 40px; text-align: right; color: #888; font-size: 14px; overflow: hidden; }
+        #result { width: 100%; border: none; font-size: 32px; text-align: right; margin-bottom: 20px; outline: none; font-weight: bold; color: var(--primary); }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        button { height: 60px; border: none; border-radius: 12px; font-size: 18px; font-weight: 600; cursor: pointer; background: #f8f9fa; transition: 0.2s; }
+        button:hover { background: #e9ecef; }
+        button:active { transform: scale(0.95); }
+        .btn-op { color: var(--primary); background: #e7f3ff; }
+        .btn-eq { background: var(--primary); color: white; grid-column: span 2; }
+        .btn-eq:hover { background: #0056b3; }
+        .btn-ac { color: #dc3545; background: #fff1f0; }
     </style>
 </head>
 <body>
 
-<div class="calc-container">
-    <input type="text" id="display" readonly value="0">
-    <div class="buttons">
-        <button class="gray" onclick="clearDisplay()">AC</button>
-        <button class="gray" onclick="toggleSign()">+/-</button>
-        <button class="gray" onclick="appendToDisplay('%')">%</button>
-        <button class="orange" onclick="appendToDisplay('/')">÷</button>
-        <button class="dark-gray" onclick="appendToDisplay('7')">7</button>
-        <button class="dark-gray" onclick="appendToDisplay('8')">8</button>
-        <button class="dark-gray" onclick="appendToDisplay('9')">9</button>
-        <button class="orange" onclick="appendToDisplay('*')">×</button>
-        <button class="dark-gray" onclick="appendToDisplay('4')">4</button>
-        <button class="dark-gray" onclick="appendToDisplay('5')">5</button>
-        <button class="dark-gray" onclick="appendToDisplay('6')">6</button>
-        <button class="orange" onclick="appendToDisplay('-')">−</button>
-        <button class="dark-gray" onclick="appendToDisplay('1')">1</button>
-        <button class="dark-gray" onclick="appendToDisplay('2')">2</button>
-        <button class="dark-gray" onclick="appendToDisplay('3')">3</button>
-        <button class="orange" onclick="appendToDisplay('+')">+</button>
-        <button class="dark-gray zero" onclick="appendToDisplay('0')">0</button>
-        <button class="dark-gray" onclick="appendToDisplay('.')">.</button>
-        <button class="orange" onclick="calculate()">=</button>
+<div class="calc-box">
+    <div class="history" id="history"></div>
+    <input type="text" id="result" value="0" readonly>
+    <div class="grid">
+        <button class="btn-ac" onclick="clearAll()">AC</button>
+        <button class="btn-op" onclick="del()">DEL</button>
+        <button class="btn-op" onclick="press('%')">%</button>
+        <button class="btn-op" onclick="press('/')">÷</button>
+        
+        <button onclick="press('7')">7</button>
+        <button onclick="press('8')">8</button>
+        <button onclick="press('9')">9</button>
+        <button class="btn-op" onclick="press('*')">×</button>
+        
+        <button onclick="press('4')">4</button>
+        <button onclick="press('5')">5</button>
+        <button onclick="press('6')">6</button>
+        <button class="btn-op" onclick="press('-')">−</button>
+        
+        <button onclick="press('1')">1</button>
+        <button onclick="press('2')">2</button>
+        <button onclick="press('3')">3</button>
+        <button class="btn-op" onclick="press('+')">+</button>
+        
+        <button onclick="press('0')">0</button>
+        <button onclick="press('.')">.</button>
+        <button class="btn-eq" onclick="equal()">=</button>
     </div>
 </div>
 
 <script>
-    let display = document.getElementById('display');
-    function appendToDisplay(val) {
-        if (display.value === "0") display.value = val;
-        else display.value += val;
+    let res = document.getElementById('result');
+    let hist = document.getElementById('history');
+
+    function press(val) {
+        if (res.value === "0") res.value = val;
+        else res.value += val;
     }
-    function clearDisplay() { display.value = "0"; }
-    function toggleSign() { display.value = display.value.startsWith('-') ? display.value.substr(1) : '-' + display.value; }
-    function calculate() {
+
+    function clearAll() { res.value = "0"; hist.innerText = ""; }
+    
+    function del() {
+        res.value = res.value.length > 1 ? res.value.slice(0, -1) : "0";
+    }
+
+    function equal() {
         try {
-            let result = eval(display.value.replace('×', '*').replace('÷', '/'));
-            display.value = Number.isInteger(result) ? result : result.toFixed(2);
-        } catch { display.value = "Lỗi"; }
+            let expression = res.value.replace('×', '*').replace('÷', '/');
+            hist.innerText = res.value + " =";
+            res.value = eval(expression);
+        } catch {
+            res.value = "Lỗi phép tính";
+        }
     }
+
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then(() => console.log("iOS Calc PWA Ready!"));
+        navigator.serviceWorker.register('./sw.js').then(() => console.log("Multi-Calc Ready"));
     }
 </script>
 </body>
